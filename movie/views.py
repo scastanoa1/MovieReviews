@@ -8,7 +8,7 @@ def home( request):
     #return render(request, 'home.html')
     #return render(request, 'home.html', {'name':'Sebastián Castaño'})
     searchTerm = request.GET.get('searchMovie')
-    movies = Movie.object.all()
+    movies = Movie.objects.all()
     return render(request, 'home.html', {'searchTerm':searchTerm, 'movies': movies})
 
 def About(request):
