@@ -26,7 +26,8 @@ def About(request):
 def statistics_view(request) :
     matplotlib.use('Agg')
     years = Movie.objects.values_list('year' ,flat=True).distinct().order_by('year') # Obtener todos IOS años de las películas
-    movie_counts_by_year = {} # Crear un diccionario para almacenar Ia cantidad de películas por año
+    all_movies = Movie.objects.all()
+    movie_counts_by_year = {} # Crear un diccionario para almacenar la cantidad de películas por año
     for year in years: # Contar la cantidad de películas por año
         if year:
             movies_in_year = Movie.objects.filter(year=year)
@@ -57,8 +58,32 @@ def statistics_view(request) :
     # Convertir la gráfica a base64
     image_png = buffer.getvalue()
     buffer.close()
-    graphic = base64.b64encode(image_png)
-    graphic = graphic.decode('utf-8')
+    graphic_per_year = base64.b64encode(image_png).decode('utf-8')
+    
+    #Gráfico 2
+    all_movies = Movie.objects.all()
+    movie_counts_by_genre = {}
+    for movie in all_movies:
+        genre = movie.genre if movie.genre else "None"
+        if genre in movie_counts_by_genre:
+            movie_counts_by_genre[genre] += 1
+        else:
+            movie_counts_by_genre[genre] = 1
+    bar_positions = range(len(movie_counts_by_genre))
+    plt.bar(bar_positions, movie_counts_by_genre.values(), width=bar_width, align='center')
+    plt.title('Movies per genre')
+    plt.xlabel('Genre')
+    plt.ylabel('Number of movies')
+    plt.xticks(bar_positions, movie_counts_by_genre.keys(), rotation=90)
+    plt.subplots_adjust(bottom=0.3)
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    plt.close()
+    image_png = buffer.getvalue()
+    buffer.close()
+    graphic_per_genre = base64.b64encode(image_png).decode('utf-8')
 
     # Renderizar la plantilla statistics. html con la gráfica
-    return render(request , 'statistics.html', {'graphic': graphic})
+    return render(request , 'statistics.html', {'graphic_per_year': graphic_per_year, 'graphic_per_genre':graphic_per_genre})
+
