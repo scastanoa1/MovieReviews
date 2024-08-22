@@ -87,3 +87,6 @@ def statistics_view(request) :
     # Renderizar la plantilla statistics. html con la gráfica
     return render(request , 'statistics.html', {'graphic_per_year': graphic_per_year, 'graphic_per_genre':graphic_per_genre})
 
+def signup(request):
+    email = request.GET.get('email')
+    return render(request, 'signup.html', {'email':email})
